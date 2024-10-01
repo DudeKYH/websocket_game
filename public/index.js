@@ -3,8 +3,8 @@ import Ground from "./Ground.js";
 import ItemController from "./ItemController.js";
 import Player from "./Player.js";
 import Score from "./Score.js";
-import "./socket.js";
-import { sendEvent } from "./socket.js";
+import { sendEvent } from "./Socket.js";
+import { loadClientGameAssets } from "./init/assets.js";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -61,14 +61,32 @@ const ITEM_CONFIG = [
     id: 4,
     image: "images/items/pokeball_cyan.png",
   },
+  {
+    width: 50 / 1.5,
+    height: 50 / 1.5,
+    id: 5,
+    image: "images/items/pokeball_orange.png",
+  },
+  {
+    width: 50 / 1.5,
+    height: 50 / 1.5,
+    id: 6,
+    image: "images/items/pokeball_pink.png",
+  },
+  {
+    width: 50 / 1.5,
+    height: 50 / 1.5,
+    id: 7,
+    image: "images/items/pokeball_rare.png",
+  },
 ];
 
 // 게임 요소들
 let player = null;
 let ground = null;
 let cactiController = null;
-let itemController = null;
-let score = null;
+export let itemController = null;
+export let score = null;
 
 let scaleRatio = null;
 let previousTime = null;
@@ -162,14 +180,26 @@ function getScaleRatio() {
   }
 }
 
-function setScreen() {
+async function initGameAssets() {
+  try {
+    const assets = await loadClientGameAssets();
+    console.log(assets);
+    console.log("Assets loaded successfully");
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function setScreen() {
   scaleRatio = getScaleRatio();
   canvas.width = GAME_WIDTH * scaleRatio;
   canvas.height = GAME_HEIGHT * scaleRatio;
   createSprites();
+
+  await initGameAssets();
 }
 
-setScreen();
+await setScreen();
 window.addEventListener("resize", setScreen);
 
 if (screen.orientation) {
@@ -206,7 +236,10 @@ function reset() {
   ground.reset();
   cactiController.reset();
   score.reset();
+  itemController.reset();
   gameSpeed = GAME_SPEED_START;
+
+  // 게임 시작에 대한 패킷을 서버에게 보낸다.
   sendEvent(2, { timestamp: Date.now() });
 }
 
@@ -279,6 +312,9 @@ function gameLoop(currentTime) {
   }
 
   // 재귀 호출 (무한반복)
+  // requestAnimationFrame
+  // => 브라우저에게 수행하기를 원하는 애니메이션을 알리고 다음 리페인트 바로 전에 브라우저가 애니메이션을 업데이트할 지정된 함수를 호출하도록 요청한다.
+  // => 콜백의 수는 보통 1초에 60회지만, 일반적으로 대부분의 웹 브라우저에서는 W3C 권장사항에 따라 디스플레이 주사율과 일치한다.
   requestAnimationFrame(gameLoop);
 }
 

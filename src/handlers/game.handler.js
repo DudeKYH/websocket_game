@@ -1,16 +1,28 @@
-import { getGameAssets } from "../init/assets.js";
+import { getServerGameAssets } from "../init/assets.js";
+import { initItemList } from "../init/item.js";
 import { clearStage, getStage, setStage } from "../models/stage.model.js";
 
 export const gameStart = (uuid, payload) => {
-  const { stages } = getGameAssets();
+  const { stages } = getServerGameAssets();
 
   clearStage(uuid);
   // stage 배열에서 0번째 -> 1 스테이지
   // 원래라면 클라의 시간을 저장하는 서버는 절대 없다! (클라를 신용할 수 없으므로)
-  setStage(uuid, stages.data[0].id, payload.timestamp);
+
+  const { itemUnlocks } = getServerGameAssets();
+  const itemUnlock = itemUnlocks.data.find(
+    (itemUnlock) => itemUnlock.stage_id === stages.data[0].id,
+  );
+  const items = initItemList(itemUnlock.item_id);
+
+  setStage(uuid, stages.data[0].id, payload.timestamp, items);
 
   console.log("Stage: ", getStage(uuid));
-  return { status: "success" };
+  return {
+    status: "success",
+    message: "game Start Complete",
+    stageId: stages.data[0].id,
+  };
 };
 
 export const gameEnd = () => {
@@ -23,6 +35,10 @@ export const gameEnd = () => {
   }
 
   // 각 스테이지의 지속 시간을 계산하여 총 점수 계산
+  // 추후에 아이템, 초당 점수까지 합쳐서 점수 계산하도록 변경해야 한다!
+  // 추후에 아이템, 초당 점수까지 합쳐서 점수 계산하도록 변경해야 한다!
+  // 추후에 아이템, 초당 점수까지 합쳐서 점수 계산하도록 변경해야 한다!
+  // 추후에 아이템, 초당 점수까지 합쳐서 점수 계산하도록 변경해야 한다!
   let totalScore = 0;
 
   stages.forEach((stage, index) => {

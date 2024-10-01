@@ -1,6 +1,6 @@
 import { CLIENT_VERSION } from "../constant.js";
 import { createStage } from "../models/stage.model.js";
-import { getUser, removeUser } from "../models/user.model.js";
+import { getUsers, removeUser } from "../models/user.model.js";
 import handlerMappings from "./handlerMapping.js";
 
 export const handleDisconnect = (socket, uuid) => {
@@ -9,12 +9,12 @@ export const handleDisconnect = (socket, uuid) => {
   removeUser(socket.id);
 
   console.log(`User disconnected: ${uuid} with socket ID ${socket.id} `);
-  console.log("Current users: ", getUser());
+  console.log("Current users: ", getUsers());
 };
 
 export const handleConnection = (socket, uuid) => {
   console.log(`New User Connected : ${uuid} with socket ID ${socket.id} `);
-  console.log("Current Users: ", getUser());
+  console.log("Current Users: ", getUsers());
 
   createStage(uuid);
 
