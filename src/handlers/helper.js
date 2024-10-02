@@ -6,7 +6,7 @@ import handlerMappings from "./handlerMapping.js";
 export const handleDisconnect = (socket, uuid) => {
   console.log(`info : ${socket}`);
 
-  removeUser(socket.id);
+  removeUser(uuid);
 
   console.log(`User disconnected: ${uuid} with socket ID ${socket.id} `);
   console.log("Current users: ", getUsers());

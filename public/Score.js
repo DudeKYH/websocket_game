@@ -1,12 +1,13 @@
 import { sendEvent } from "./Socket.js";
+import { getClientGameAssets } from "./init/assets.js";
 
 class Score {
   score = 0;
   HIGH_SCORE_KEY = "highScore";
   stageChange = true;
-  scorePerSecond = 1;
-  goalScore = 10;
-  stageId = 1001;
+  scorePerSecond = 0;
+  goalScore = 0;
+  stageId = 0;
 
   constructor(ctx, scaleRatio) {
     this.ctx = ctx;
@@ -17,7 +18,7 @@ class Score {
   update(deltaTime) {
     this.score += deltaTime * 0.001 * this.scorePerSecond;
     // score가 점수
-    if (Math.floor(this.score) === this.goalScore && this.stageChange) {
+    if (Math.floor(this.score) >= this.goalScore && this.stageChange) {
       this.stageChange = false;
       sendEvent(11, {
         currentStage: this.stageId,
@@ -27,12 +28,20 @@ class Score {
     }
   }
 
+  // 아이템을 획득시 getItem()함수가 호출
   getItem(itemId) {
-    this.score += 0;
+    const { items } = getClientGameAssets();
 
-    // sendEvent(12, {
-    //   itemId: itemId,
-    // });
+    const item = items.data.find((item) => item.id === itemId);
+    if (!item) {
+      console.log(`${itemId} getItem Not Found`);
+    }
+
+    //  아이템 획득 시, 클라이언트의 Score는 아이템 점수만큼 증가
+    this.score += item.score;
+
+    // 서버에게 아이템 획득을 알려준다.
+    sendEvent(12, { itemId });
   }
 
   reset() {
@@ -101,14 +110,26 @@ class Score {
     return this.stageId;
   }
 
-  setScoreInfo(stageInfo) {
-    this.stageId = stageInfo.stageId;
-    //this.score = stageInfo.score;
-    this.goalScore = stageInfo.goalScore;
-    this.scorePerSecond = stageInfo.scorePerSecond;
-    this.stageChange = true;
+  setScoreInfo(stageId) {
+    const { stages } = getClientGameAssets();
 
-    console.log(this);
+    // 패킷으로부터 받은 stageId에 맞는 StageInfo 세팅
+    try {
+      const stage = stages.data.find((stage) => stage.id === stageId);
+      if (!stage) {
+        throw new Error(`${stageId} Stage not found`);
+      }
+
+      this.stageId = stage.id;
+      //this.score = stageInfo.score;
+      this.goalScore = stage.goalScore;
+      this.scorePerSecond = stage.scorePerSecond;
+      this.stageChange = true;
+
+      console.log("stage : ", this);
+    } catch (err) {
+      throw err;
+    }
   }
 }
 

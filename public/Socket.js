@@ -1,5 +1,5 @@
 import { CLIENT_VERSION } from "./Constant.js";
-import { score } from "./index.js";
+import { itemController, score } from "./index.js";
 
 const socket = io("http://localhost:3000", {
   query: {
@@ -13,14 +13,21 @@ socket.on("response", (data) => {
 
   // 서버로부터 다음 스테이지 정보가 recv
   // 스테이지 세팅
-  if (data.status === "success" && data.stageInfo) {
-    if (!score) {
-      console.log("score Error");
-    }
+  try {
+    if (data.status === "success" && data.stageId) {
+      if (!score) {
+        throw new Error("Packet not include stageId!");
+      }
+      // 서버 점수로 동기화시킬건지는 고민...
 
-    // 서버 점수로 동기화시킬건지는 고민...
-    score.setScoreInfo(data.stageInfo);
-    //itemController.setSelectableItemNumber(data.stageInfo.itemId);
+      score.setScoreInfo(data.stageId);
+      itemController.setSelectableItemNumber(data.stageId);
+    }
+    if (data.status === "success" && data.score) {
+      console.log(`Game End Complete! Score : ${data.score}`);
+    }
+  } catch (err) {
+    console.error("Err : ", err.message);
   }
 });
 

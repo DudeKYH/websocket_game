@@ -195,10 +195,9 @@ async function setScreen() {
   canvas.width = GAME_WIDTH * scaleRatio;
   canvas.height = GAME_HEIGHT * scaleRatio;
   createSprites();
-
-  await initGameAssets();
 }
 
+await initGameAssets();
 await setScreen();
 window.addEventListener("resize", setScreen);
 
@@ -290,8 +289,13 @@ function gameLoop(currentTime) {
     gameover = true;
     score.setHighScore();
     setupGameReset();
+    sendEvent(3, {
+      timestamp: Date.now(),
+      score: score.getScore(),
+    });
   }
   const collideWithItem = itemController.collideWith(player);
+  // 플레이어와 충돌된 아이템의 경우 score.getItem()을 호출한다.
   if (collideWithItem && collideWithItem.itemId) {
     score.getItem(collideWithItem.itemId);
   }

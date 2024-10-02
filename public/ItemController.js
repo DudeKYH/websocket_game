@@ -1,12 +1,13 @@
+import { getClientGameAssets } from "./init/assets.js";
 import Item from "./Item.js";
 
 class ItemController {
-  INTERVAL_MIN = 0;
-  INTERVAL_MAX = 12000;
+  INTERVAL_MIN = 5000;
+  INTERVAL_MAX = 10000;
 
   nextInterval = null;
   items = [];
-  selectableItemNumber = 0;
+  selectableItemNumber = 1;
 
   constructor(ctx, itemImages, scaleRatio, speed) {
     this.ctx = ctx;
@@ -19,6 +20,7 @@ class ItemController {
   }
 
   setNextItemTime() {
+    // 아이템은 5~10초 사이에 하나씩 생성된다.
     this.nextInterval = this.getRandomNumber(
       this.INTERVAL_MIN,
       this.INTERVAL_MAX,
@@ -26,12 +28,11 @@ class ItemController {
   }
 
   getRandomNumber(min, max) {
-    return Math.floor(Math.random() * (max - min + 1) + min);
+    return Math.floor(Math.random() * (max - min) + min);
   }
 
   createItem() {
-    //const index = this.getRandomNumber(0, this.selectableItemNumber);
-    const index = 6;
+    const index = this.getRandomNumber(0, this.selectableItemNumber);
     const itemInfo = this.itemImages[index];
     const x = this.canvas.width * 1.5;
     const y = this.getRandomNumber(10, this.canvas.height - itemInfo.height);
@@ -87,11 +88,27 @@ class ItemController {
     this.items = [];
   }
 
-  setSelectableItemNumber(number) {
-    this.selectableItemNumber = number;
+  setSelectableItemNumber(stageId) {
+    const { itemUnlocks } = getClientGameAssets();
+
+    // 스테이지ID에 맞는 생성 가능한 아이템 종류를 지정해준다.
+    try {
+      const itemUnlock = itemUnlocks.data.find(
+        (itemUnlock) => itemUnlock.stage_id === stageId,
+      );
+      if (!itemUnlock) {
+        throw new Error(`${stageId} itemUnlock not found`);
+      }
+
+      this.selectableItemNumber = itemUnlock.item_id;
+
+      console.log("selectedItem : ", this.selectableItemNumber);
+    } catch (err) {
+      throw err;
+    }
   }
 
-  getSelectableItemNumber() {
+  getSelectableItemNumber(stageId) {
     return this.selectableItemNumber;
   }
 }

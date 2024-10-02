@@ -22,6 +22,6 @@ server.listen(PORT, async () => {
     console.log(assets);
     console.log("Assets loaded successfully");
   } catch (err) {
-    console.error("Failed to load game assets: ", e);
+    console.error("Failed to load game assets: ", err.message);
   }
 });
