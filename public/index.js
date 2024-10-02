@@ -1,4 +1,5 @@
 import CactiController from "./CactiController.js";
+import { HIGH_SCORE } from "./Constant.js";
 import Ground from "./Ground.js";
 import ItemController from "./ItemController.js";
 import Player from "./Player.js";
@@ -159,7 +160,7 @@ function createSprites() {
     GROUND_SPEED,
   );
 
-  score = new Score(ctx, scaleRatio);
+  score = new Score(ctx, scaleRatio, HIGH_SCORE);
 }
 
 function getScaleRatio() {
@@ -287,7 +288,7 @@ function gameLoop(currentTime) {
 
   if (!gameover && cactiController.collideWith(player)) {
     gameover = true;
-    score.setHighScore();
+    //score.setHighScore();
     setupGameReset();
     sendEvent(3, {
       timestamp: Date.now(),

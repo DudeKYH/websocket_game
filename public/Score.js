@@ -3,16 +3,16 @@ import { getClientGameAssets } from "./init/assets.js";
 
 class Score {
   score = 0;
-  HIGH_SCORE_KEY = "highScore";
   stageChange = true;
   scorePerSecond = 0;
   goalScore = 0;
   stageId = 0;
 
-  constructor(ctx, scaleRatio) {
+  constructor(ctx, scaleRatio, highScore) {
     this.ctx = ctx;
     this.canvas = ctx.canvas;
     this.scaleRatio = scaleRatio;
+    this.highScore = highScore;
   }
 
   update(deltaTime) {
@@ -52,16 +52,17 @@ class Score {
     this.stageId = 1000;
   }
 
-  setHighScore() {
-    const highScore = Number(localStorage.getItem(this.HIGH_SCORE_KEY));
+  setHighScore(highScore) {
+    this.highScore = highScore;
+    // const highScore = Number(localStorage.getItem(this.HIGH_SCORE_KEY));
 
-    if (this.score > highScore) {
-      // localStorage : 브라우저에 key-value 값을 Storage에 저장할 수 있다.
-      // 데이터는 Session 간에 공유된다. => 즉, 세션이 바뀌어도 데이터는 유지된다.
+    // if (this.score > highScore) {
+    //   // localStorage : 브라우저에 key-value 값을 Storage에 저장할 수 있다.
+    //   // 데이터는 Session 간에 공유된다. => 즉, 세션이 바뀌어도 데이터는 유지된다.
 
-      // setItem(key, value) : storage에 key-value를 저장한다.
-      localStorage.setItem(this.HIGH_SCORE_KEY, Math.floor(this.score));
-    }
+    //   // setItem(key, value) : storage에 key-value를 저장한다.
+    //   localStorage.setItem(this.HIGH_SCORE_KEY, Math.floor(this.score));
+    // }
   }
 
   getScore() {
@@ -69,7 +70,8 @@ class Score {
   }
 
   draw() {
-    const highScore = Number(localStorage.getItem(this.HIGH_SCORE_KEY));
+    //const highScore = Number(localStorage.getItem(this.HIGH_SCORE_KEY));
+    const highScore = this.highScore;
     const y = 20 * this.scaleRatio;
 
     const fontSize = 20 * this.scaleRatio;
@@ -80,7 +82,9 @@ class Score {
     const highScoreX = scoreX - 125 * this.scaleRatio;
 
     const scorePadded = Math.floor(this.score).toString().padStart(6, 0);
-    const highScorePadded = highScore.toString().padStart(6, 0);
+    const highScorePadded = Math.floor(this.highScore)
+      .toString()
+      .padStart(6, 0);
 
     this.ctx.fillText(scorePadded, scoreX, y);
     this.ctx.fillText(`HI ${highScorePadded}`, highScoreX, y);
@@ -125,8 +129,6 @@ class Score {
       this.goalScore = stage.goalScore;
       this.scorePerSecond = stage.scorePerSecond;
       this.stageChange = true;
-
-      console.log("stage : ", this);
     } catch (err) {
       throw err;
     }

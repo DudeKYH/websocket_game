@@ -1,3 +1,4 @@
+import { HIGH_SCORE, setHighScore } from "../constant.js";
 import { getServerGameAssets } from "../init/assets.js";
 import {
   clearStage,
@@ -89,7 +90,24 @@ export const gameEnd = (uuid, payload) => {
   }
 
   // DB 저장한다고 가정을 한다면
-  // setRsult (userId, score, timestamp) 와 같이 게임 로그를 남길 수도 있다.
+  // setRsult (userId, score, timestamp) 와 같이 게임 로그를 남기는 게 좋겠다.
 
-  return { status: "success", message: "Game ended", score: clientScore };
+  // 게임 종료 후, 서버에 저장된 HIGH_SCORE와 비교해본다.
+  // HIGH_SCORE가 갱신된다면, 브로드캐스트로 모든 유저에게 알려준다.
+  if (clientScore > HIGH_SCORE) {
+    setHighScore(clientScore);
+
+    return {
+      broadcast: true,
+      status: "success",
+      message: "Congratulation~~~ you got highedst score",
+      highScore: clientScore,
+    };
+  }
+
+  return {
+    status: "success",
+    message: "Game ended",
+    score: clientScore,
+  };
 };

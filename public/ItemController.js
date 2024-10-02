@@ -101,8 +101,6 @@ class ItemController {
       }
 
       this.selectableItemNumber = itemUnlock.item_id;
-
-      console.log("selectedItem : ", this.selectableItemNumber);
     } catch (err) {
       throw err;
     }
