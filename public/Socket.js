@@ -1,13 +1,35 @@
 import { CLIENT_VERSION, setHighScore } from "./Constant.js";
 import { itemController, score } from "./index.js";
 
+
+const getUserId = () => {
+  const localUserId = localStorage.getItem("userId");
+
+  if(!localUserId) {
+    return null;
+  }
+
+  return localUserId;
+}
+
+const setUserId = (uuid) => {
+  localStorage.setItem("userId", uuid);
+}
+
+let userId = getUserId();
+
 const socket = io("http://localhost:3000", {
   query: {
     clientVersion: CLIENT_VERSION,
   },
+  auth: {
+    userId: userId,
+  }
 });
 
-let userId = null;
+
+
+
 socket.on("response", (data) => {
   console.log(data);
 
@@ -65,7 +87,9 @@ socket.on("response", (data) => {
 
 socket.on("connection", (data) => {
   console.log("connection: ", data);
-  userId = data.uuid;
+
+  setUserId(data.uuid);
+  userId = getUserId();
 });
 
 // src/handlers/handlerMapping.js 참고
