@@ -63,9 +63,6 @@ export const moveStageHandler = (userId, payload) => {
   );
 
   const scoreDifference = Math.abs(serverScore - clientScore);
-  console.log(
-    `${currentStage.id} Stage Server<->Client Score Difference : ${scoreDifference}`,
-  );
 
   // 클라이언트와 서버간의 Score 유효성 검사 (Score 오차 범위: ±5)
   // - 클라와 서버간의 레이턴시로 완벽하게 Score가 일치할 수 없으므로 일정 범위의 오차를 두어 검사한다.
@@ -151,8 +148,6 @@ export const getItemHandler = (userId, payload) => {
     (item) => item.itemId === payload.itemId,
   );
   item.count += 1;
-
-  console.log(`getItem : `, currentStage.getItems);
 
   return {
     status: "success",

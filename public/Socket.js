@@ -1,20 +1,19 @@
 import { CLIENT_VERSION, setHighScore } from "./Constant.js";
 import { itemController, score } from "./index.js";
 
-
 const getUserId = () => {
   const localUserId = localStorage.getItem("userId");
 
-  if(!localUserId) {
+  if (!localUserId) {
     return null;
   }
 
   return localUserId;
-}
+};
 
 const setUserId = (uuid) => {
   localStorage.setItem("userId", uuid);
-}
+};
 
 let userId = getUserId();
 
@@ -24,11 +23,8 @@ const socket = io("http://localhost:3000", {
   },
   auth: {
     userId: userId,
-  }
+  },
 });
-
-
-
 
 socket.on("response", (data) => {
   console.log(data);
@@ -39,7 +35,7 @@ socket.on("response", (data) => {
     if (data.status === "success") {
       if (data.broadcast) {
         if (data.highScore) {
-          console.log("Broadcast HighScore : ", data.highScore);
+          //console.log("Broadcast HighScore : ", data.highScore);
           // HIGH_SCORE 변수 변경
           setHighScore(data.highScore);
           if (score) {
@@ -50,9 +46,6 @@ socket.on("response", (data) => {
       } else {
         // 스테이지 이벤트 패킷
         if (data.stageId) {
-          if (!score) {
-            throw new Error("Packet not include stageId!");
-          }
           // 서버 점수로 동기화시킬건지는 고민...
 
           // 이동할 스테이지 정보 세팅
@@ -62,17 +55,26 @@ socket.on("response", (data) => {
         }
         // 게임 엔드 이벤트 패킷
         if (data.score) {
-          console.log(`Game End Complete! Score : ${data.score}`);
+          //console.log(`Game End Complete! Score : ${data.score}`);
         }
-        // 게임 접속 시 최고 점수 패킷
+        // 게임 접속 시 최고 점수 패킷, 로그인 횟수 응답
         if (data.highScore) {
-          console.log("Connection HighScore : ", data.highScore);
+          // console.log("Connection HighScore : ", data.highScore);
           // HIGH_SCORE 변수 변경
           setHighScore(data.highScore);
           if (score) {
             // 현재 score의 highScore 멤버 변수 변경
             score.setHighScore(data.highScore);
           }
+
+          const connectionText = `<p>환영합니다. 점핑 액션 게임에 ${data.connectionCount}번째 방문이시네요.</p>`;
+          document.getElementById("connect").innerHTML = connectionText;
+        }
+        // 게임 접속 시 유저가 최고기록읃 달성한 적이 있는 경우 응답받는 패킷
+        if (data.rank) {
+          // console.log("rank : ", data.rank, "score: ", data.rankScore);
+          const rankText = `<p>플레이어께선 랭킹 ${data.rank}등 (${Math.floor(data.rankScore)}점) 기록을 가지고 있습니다.</p>`;
+          document.getElementById("rank").innerHTML = rankText;
         }
       }
     }
@@ -86,7 +88,7 @@ socket.on("response", (data) => {
 });
 
 socket.on("connection", (data) => {
-  console.log("connection: ", data);
+  //console.log("connection: ", data);
 
   setUserId(data.uuid);
   userId = getUserId();

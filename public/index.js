@@ -184,7 +184,7 @@ function getScaleRatio() {
 async function initGameAssets() {
   try {
     const assets = await loadClientGameAssets();
-    console.log(assets);
+    //console.log(assets);
     console.log("Assets loaded successfully");
   } catch (err) {
     console.error(err);

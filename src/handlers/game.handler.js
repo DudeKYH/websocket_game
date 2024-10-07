@@ -1,5 +1,9 @@
-import { HIGH_SCORE, setHighScore } from "../constant.js";
 import { getServerGameAssets } from "../init/assets.js";
+import {
+  addHighScoreRecord,
+  addStageRecord,
+  getHighScore,
+} from "../models/redis.model.js";
 import {
   clearStage,
   getStage,
@@ -24,8 +28,6 @@ export const gameStart = (uuid, payload) => {
   // - items : 스테이지간의 획득한 아이템 리스트 (setStgae 함수 내부에서 자동으로 초기화 해준뒤 세팅해준다)
   setStage(uuid, stages.data[0].id, payload.timestamp, 0);
 
-  console.log("Stage: ", getStage(uuid));
-
   // 클라이언트에게 서버도 게임 시작을 인지했음을 알려준다.
   return {
     status: "success",
@@ -35,7 +37,7 @@ export const gameStart = (uuid, payload) => {
 };
 
 /** 게임 종료에 대한 핸들러**/
-export const gameEnd = (uuid, payload) => {
+export const gameEnd = async (uuid, payload) => {
   // 클라이언트는 게임 종료 시 score, timestamp를 payload에 담아 보내준다.
   const { timestamp: gameEndTime, score: clientScore } = payload;
 
@@ -79,9 +81,6 @@ export const gameEnd = (uuid, payload) => {
 
   // 클라이언트와 서버의 총 점수 차이 출력 (디버깅을 위해)
   const totalScoreDifference = Math.abs(totalScore - clientScore);
-  console.log(
-    `Total Stage Server<->Client Score Difference : ${totalScoreDifference}`,
-  );
 
   // 점수와 타임스탬프 검증
   // 오차범위 5
@@ -91,16 +90,18 @@ export const gameEnd = (uuid, payload) => {
 
   // DB 저장한다고 가정을 한다면
   // setRsult (userId, score, timestamp) 와 같이 게임 로그를 남기는 게 좋겠다.
+  const endStageInfo = userStages[userStages.length - 1];
+  await addStageRecord(uuid, clientScore, endStageInfo);
 
   // 게임 종료 후, 서버에 저장된 HIGH_SCORE와 비교해본다.
   // HIGH_SCORE가 갱신된다면, 브로드캐스트로 모든 유저에게 알려준다.
-  if (clientScore > HIGH_SCORE) {
-    setHighScore(clientScore);
+  const highScore = await getHighScore();
+  if (clientScore > highScore) {
+    await addHighScoreRecord(uuid, clientScore);
 
     return {
       broadcast: true,
       status: "success",
-      message: "Congratulation~~~ you got highedst score",
       highScore: clientScore,
     };
   }

@@ -37,8 +37,6 @@ export const getStageScore = (stage, stageDuration, scorePerSecond) => {
     return acc + itemInfo.score * cur.count;
   }, 0);
 
-  console.log(`${stage.id} Stage itemsScore : ${itemsScore}`);
-
   // 스테이지 별로 초당 획득하는 Score가 다르다.
   const runningScore = stageDuration * scorePerSecond;
 
