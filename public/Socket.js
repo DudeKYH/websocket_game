@@ -1,5 +1,8 @@
+import dotenv from "dotenv";
 import { CLIENT_VERSION, setHighScore } from "./Constant.js";
 import { itemController, score } from "./index.js";
+
+dotenv.config();
 
 const getUserId = () => {
   const localUserId = localStorage.getItem("userId");
@@ -17,14 +20,17 @@ const setUserId = (uuid) => {
 
 let userId = getUserId();
 
-const socket = io("http://localhost:3000", {
-  query: {
-    clientVersion: CLIENT_VERSION,
+const socket = io(
+  `http://${process.env.SERVER_IP}:${process.env.SERVER_PORT}`,
+  {
+    query: {
+      clientVersion: CLIENT_VERSION,
+    },
+    auth: {
+      userId: userId,
+    },
   },
-  auth: {
-    userId: userId,
-  },
-});
+);
 
 socket.on("response", (data) => {
   console.log(data);
